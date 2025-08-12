@@ -1,5 +1,7 @@
 # SynapseFI
 
+![CI](https://github.com/rajatvarna/SynapseFI/actions/workflows/ci.yml/badge.svg)
+
 This is a monorepo project that includes a web application, a documentation site, and several backend microservices.
 
 ## Project Structure
