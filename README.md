@@ -30,6 +30,24 @@ cd SynapseFI
 npm install
 ```
 
+### Environment Variables
+
+This project uses `.env` files to manage environment variables. To get started, copy the `.env.example` file in each application or service to a new `.env` file and fill in the required values.
+
+For example, for the web application:
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+
+And for a backend service:
+
+```bash
+cp services/auth-service/.env.example services/auth-service/.env
+```
+
+The `.env` files are ignored by Git, so you can safely store your secrets in them.
+
 ## Development
 
 You can run each application from the root of the monorepo using npm workspace commands.
