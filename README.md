@@ -74,12 +74,20 @@ The site will be available at `http://localhost:3000` (or a different port if 30
 
 ### Backend Services
 
-The backend services are designed to run in Docker containers. Each service has its own `Dockerfile`. To build and run a service, navigate to its directory and use Docker commands. For example, for the `auth-service`:
+The backend services are containerized using Docker and managed with Docker Compose.
+
+To start all backend services, run the following command from the root of the project:
 
 ```bash
-cd services/auth-service
-docker build -t auth-service .
-docker run -p 3001:3001 auth-service
+docker-compose up --build -d
+```
+
+This will build the images for all services (if they don't exist) and start them in the background.
+
+To stop the services, run:
+
+```bash
+docker-compose down
 ```
 
 ## Linting
