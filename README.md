@@ -97,3 +97,19 @@ To check the code for linting errors, run the following command from the root of
 ```bash
 npm run lint
 ```
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit and component testing.
+
+To run all tests, use the following command from the root of the project:
+
+```bash
+npm test
+```
+
+To run the tests and see a coverage report, run:
+
+```bash
+npm run test:cov
+```
