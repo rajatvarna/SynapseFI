@@ -28,6 +28,38 @@ export default [
         ...config,
         files: ["services/**/*.ts", "packages/**/*.ts"],
     })),
+    // New config for Docusaurus config files
+    ...tseslint.configs.recommended.map(config => ({
+        ...config,
+        files: ["apps/docs/*.ts"],
+        languageOptions: {
+            ...config.languageOptions,
+            globals: {
+                ...globals.node,
+            },
+        },
+    })),
+    // New config for Docusaurus source files
+    ...tseslint.configs.recommended.map(config => ({
+        ...config,
+        files: ["apps/docs/src/**/*.{ts,tsx}"],
+        rules: {
+            ...config.rules,
+            "@typescript-eslint/no-require-imports": "off",
+        },
+        languageOptions: {
+            ...config.languageOptions,
+            parserOptions: {
+                ...config.languageOptions?.parserOptions,
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+            globals: {
+                ...globals.browser,
+            },
+        },
+    })),
     {
         files: ["services/**/*.ts"],
         languageOptions: {
