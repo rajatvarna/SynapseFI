@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Stock } from "shared-types";
 import { notFound } from "next/navigation";
+import { PriceChart } from "@/components/PriceChart";
 
 type StockPageProps = {
   params: {
@@ -93,8 +94,8 @@ export default async function StockPage({ params }: StockPageProps) {
             <CardTitle>Price Chart</CardTitle>
             <CardDescription>Last 5 days</CardDescription>
           </CardHeader>
-          <CardContent className="h-64 flex items-center justify-center">
-            <p className="text-muted-foreground">Chart will be here</p>
+          <CardContent>
+            <PriceChart data={stockData.historicalData} />
           </CardContent>
         </Card>
       </div>

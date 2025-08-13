@@ -48,7 +48,7 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 // Broadcast updated prices every 2 seconds
-setInterval(() => {
+const priceUpdateInterval = setInterval(() => {
   mockStockData.forEach(stock => {
     const priceChange = (Math.random() - 0.5) * 2; // -1 to +1 change
     const newPrice = stock.historicalData[stock.historicalData.length - 1].price + priceChange;
@@ -74,3 +74,5 @@ setInterval(() => {
 server.listen(port, () => {
   console.log(`Market data service with WebSocket listening at http://localhost:${port}`);
 });
+
+export { app, server, priceUpdateInterval };
