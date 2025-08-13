@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    networks:
+      - app-network
+
+  market-data-service:
+    build:
+      context: ./services/market-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    networks:
+      - app-network
+
+  user-profile-service:
+    build:
+      context: ./services/user-profile-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
