@@ -7,7 +7,7 @@ def run():
         page = browser.new_page()
         try:
             # Navigate to the stock detail page for AAPL
-            url = "http://localhost:3001/stock/AAPL"
+            url = "http://localhost:3000/stock/AAPL"
             print(f"Navigating to {url}...")
             page.goto(url, timeout=20000)
 

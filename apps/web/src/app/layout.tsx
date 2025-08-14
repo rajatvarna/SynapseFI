@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 };
 
 import { StockPriceProvider } from "@/context/StockPriceContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { Header } from "@/components/Header";
 
 export default function RootLayout({
   children,
@@ -27,9 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <StockPriceProvider>{children}</StockPriceProvider>
+        <AuthProvider>
+          <StockPriceProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+          </StockPriceProvider>
+        </AuthProvider>
       </body>
     </html>
   );

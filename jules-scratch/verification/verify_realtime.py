@@ -6,8 +6,8 @@ def run():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         try:
-            print("Navigating to http://localhost:3001...")
-            page.goto("http://localhost:3001", timeout=20000)
+            print("Navigating to http://localhost:3000...")
+            page.goto("http://localhost:3000", timeout=20000)
 
             print("Waiting for table to be visible...")
             # Wait for the table to appear, indicating initial data load
