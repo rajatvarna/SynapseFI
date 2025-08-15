@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
