@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 'use client';
 
 import { useState } from 'react';
@@ -20,10 +21,36 @@ export default function LoginPage() {
 =======
   const [error, setError] = useState<string | null>(null);
 >>>>>>> origin/fix-lint-setup
+=======
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
+>>>>>>> origin/feat/integrate-shadcn-ui
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+<<<<<<< HEAD
 <<<<<<< HEAD
     setError('');
 
@@ -64,10 +91,19 @@ export default function LoginPage() {
       Cookies.set('token', data.token, { expires: 1 / 24 });
       router.push('/');
 >>>>>>> origin/fix-lint-setup
+=======
+    setError(null);
+    try {
+      await login(email, password);
+      router.push("/"); // Redirect to dashboard on successful login
+    } catch (err) {
+      setError(err.message);
+>>>>>>> origin/feat/integrate-shadcn-ui
     }
   };
 
   return (
+<<<<<<< HEAD
 <<<<<<< HEAD
     <div className="flex justify-center items-center min-h-screen">
       <form onSubmit={handleSubmit} className="p-8 border rounded-lg shadow-lg">
@@ -107,6 +143,20 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email">Email</label>
+=======
+    <div className="flex items-center justify-center py-12">
+      <Card className="mx-auto max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+>>>>>>> origin/feat/integrate-shadcn-ui
               <Input
                 id="email"
                 type="email"
@@ -116,8 +166,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+<<<<<<< HEAD
             <div className="space-y-2">
               <label htmlFor="password">Password</label>
+=======
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+>>>>>>> origin/feat/integrate-shadcn-ui
               <Input
                 id="password"
                 type="password"
@@ -131,9 +186,20 @@ export default function LoginPage() {
               Login
             </Button>
           </form>
+<<<<<<< HEAD
         </CardContent>
       </Card>
 >>>>>>> origin/fix-lint-setup
+=======
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+>>>>>>> origin/feat/integrate-shadcn-ui
     </div>
   );
 }
