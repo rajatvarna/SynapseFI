@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -16,6 +18,11 @@ import {
 import { Stock } from "shared-types";
 import { notFound } from "next/navigation";
 import { PriceChart } from "@/components/PriceChart";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 type StockPageProps = {
   params: {
@@ -24,26 +31,71 @@ type StockPageProps = {
 };
 
 async function getStockData(ticker: string): Promise<Stock | null> {
-  try {
-    const res = await fetch(`http://localhost:3002/stocks/${ticker}`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
-    });
+    try {
+      const res = await fetch(`http://localhost:3002/stocks/${ticker}`, {
+        next: { revalidate: 60 }, // Revalidate every 60 seconds
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        return null;
+      }
+      return res.json();
+    } catch (error) {
+      console.error("Failed to fetch stock data:", error);
       return null;
     }
-    return res.json();
-  } catch (error) {
-    console.error("Failed to fetch stock data:", error);
-    return null;
-  }
 }
 
-export default async function StockPage({ params }: StockPageProps) {
-  const stockData = await getStockData(params.ticker);
+export default function StockPage({ params }: StockPageProps) {
+    const { token } = useAuth();
+    const [stockData, setStockData] = useState<Stock | null>(null);
+    const [quantity, setQuantity] = useState(1);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchAndSetStockData = async () => {
+            const data = await getStockData(params.ticker);
+            if (data) {
+                setStockData(data);
+            } else {
+                notFound();
+            }
+        };
+        fetchAndSetStockData();
+    }, [params.ticker]);
+
+
+  const handleTrade = async (tradeType: 'BUY' | 'SELL') => {
+    if (!token) {
+        setError("You must be logged in to trade.");
+        return;
+    }
+    setError(null);
+
+    try {
+      const res = await fetch(`http://localhost:3005/${tradeType.toLowerCase()}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ symbol: params.ticker, quantity }),
+      });
+
+      if (res.ok) {
+        alert(`Successfully ${tradeType === 'BUY' ? 'bought' : 'sold'} ${quantity} shares of ${params.ticker}`);
+        // Optionally, refetch user profile/balance data here
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || `Failed to ${tradeType.toLowerCase()} stock`);
+      }
+    } catch (err) {
+      setError(`An error occurred while trying to ${tradeType.toLowerCase()} stock`);
+    }
+  };
 
   if (!stockData) {
-    notFound();
+    return <p>Loading...</p>;
   }
 
   return (
@@ -88,7 +140,7 @@ export default async function StockPage({ params }: StockPageProps) {
       </div>
 
       {/* Right Column */}
-      <div className="md:col-span-1">
+      <div className="md:col-span-1 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Price Chart</CardTitle>
@@ -97,6 +149,30 @@ export default async function StockPage({ params }: StockPageProps) {
           <CardContent>
             <PriceChart ticker={params.ticker} />
           </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Trade</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="quantity">Quantity</Label>
+                        <Input
+                            id="quantity"
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value))}
+                            min="1"
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Button onClick={() => handleTrade('BUY')}>Buy</Button>
+                        <Button variant="secondary" onClick={() => handleTrade('SELL')}>Sell</Button>
+                    </div>
+                    {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+                </div>
+            </CardContent>
         </Card>
       </div>
     </div>
