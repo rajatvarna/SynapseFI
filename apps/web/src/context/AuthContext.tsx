@@ -54,14 +54,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(errorData.message || 'Login failed');
+      throw new Error(errorData.error || 'Login failed');
     }
 
-    const data = await res.json();
-    setToken(data.token);
-    setUser(data.user);
-    localStorage.setItem('authToken', data.token);
-    localStorage.setItem('authUser', JSON.stringify(data.user));
+    const { accessToken } = await res.json();
+
+    const meRes = await fetch('http://localhost:3001/me', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if(!meRes.ok) {
+      const errorData = await meRes.json();
+      throw new Error(errorData.error || 'Failed to fetch user data');
+    }
+
+    const user = await meRes.json();
+
+    setToken(accessToken);
+    setUser(user);
+    localStorage.setItem('authToken', accessToken);
+    localStorage.setItem('authUser', JSON.stringify(user));
   };
 
   const signup = async (name, email, password) => {
@@ -73,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(errorData.message || 'Signup failed');
+      throw new Error(errorData.error || 'Signup failed');
     }
   };
 

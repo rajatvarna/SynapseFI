@@ -10,13 +10,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
-    "test": "vitest",
-    "test:cov": "vitest run --coverage",
-=======
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
->>>>>>> origin/feat/integrate-shadcn-ui
+    "test:cov": "vitest run --coverage",
     "lint": "eslint . --ext .ts,.tsx"
   },
   "repository": {

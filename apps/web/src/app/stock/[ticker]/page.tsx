@@ -95,7 +95,7 @@ export default async function StockPage({ params }: StockPageProps) {
             <CardDescription>Last 5 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <PriceChart data={stockData.historicalData} />
+            <PriceChart ticker={params.ticker} />
           </CardContent>
         </Card>
       </div>

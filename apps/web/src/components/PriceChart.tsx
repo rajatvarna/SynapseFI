@@ -1,54 +1,41 @@
 "use client";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import React, { useEffect, useRef } from 'react';
 
 interface PriceChartProps {
-  data: { date: string; price: number }[];
+  ticker: string;
 }
 
-export function PriceChart({ data }: PriceChartProps) {
-  const formattedData = data.map(item => ({
-    ...item,
-    // Format date for display on the X-axis
-    date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-  }));
+export function PriceChart({ ticker }: PriceChartProps) {
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (container.current) {
+      // Clear the container before appending the new script
+      container.current.innerHTML = '';
+      const script = document.createElement("script");
+      script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+      script.type = "text/javascript";
+      script.async = true;
+      script.innerHTML = `
+        {
+          "autosize": true,
+          "symbol": "${ticker}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "light",
+          "style": "1",
+          "locale": "en",
+          "allow_symbol_change": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }`;
+      container.current.appendChild(script);
+    }
+  }, [ticker]);
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart
-        data={formattedData}
-        margin={{
-          top: 5,
-          right: 20,
-          left: -10,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis domain={['dataMin', 'dataMax']} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "hsl(var(--background))",
-            borderColor: "hsl(var(--border))",
-          }}
-        />
-        <Line
-          type="monotone"
-          dataKey="price"
-          stroke="hsl(var(--primary))"
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="tradingview-widget-container" ref={container} style={{ height: "400px", width: "100%" }}>
+    </div>
   );
 }

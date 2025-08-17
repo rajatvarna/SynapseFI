@@ -1,10 +1,8 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
-import dotenv from 'dotenv';
+import cors from 'cors';
 import {
   hashPassword,
   comparePassword,
@@ -12,42 +10,13 @@ import {
   verifyToken,
 } from './utils/auth';
 
-// Load environment variables from .env file
-dotenv.config();
-=======
-import cors from 'cors';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { users } from './db';
-import { User } from 'shared-types';
->>>>>>> origin/feat/integrate-shadcn-ui
-
 const app = express();
 const prisma = new PrismaClient();
-=======
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { User as SharedUser } from 'shared-types';
-
-// Extend the shared User type to include the password for internal use
-type User = SharedUser & {
-  password?: string;
-};
-
-const app = express();
-app.use(express.json()); // Middleware to parse JSON bodies
-
->>>>>>> origin/fix-lint-setup
 const port = process.env.PORT || 3001;
-<<<<<<< HEAD
-const JWT_SECRET = process.env.JWT_SECRET || 'a-default-secret-key';
 
-// In-memory database for demonstration
-const users: User[] = [];
-
+app.use(cors());
 app.use(bodyParser.json());
 
-// Middleware to verify JWT
 const authenticateToken = (req: Request, res: Response, next: () => void) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -62,24 +31,13 @@ const authenticateToken = (req: Request, res: Response, next: () => void) => {
     return res.sendStatus(403);
   }
 };
-=======
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
->>>>>>> origin/feat/integrate-shadcn-ui
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
 app.get('/', (req: Request, res: Response) => {
   res.send('Auth service is running!');
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Register a new user
-app.post('/register', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+app.post('/register', async (request: Request, res: Response) => {
+  const { email, password } = request.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -99,41 +57,10 @@ app.post('/register', async (req: Request, res: Response) => {
   }
 });
 
-// Login a user
-=======
-app.post('/register', async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
-  const userExists = users.find((user) => user.email === email);
-  if (userExists) {
-    return res.status(409).json({ message: 'User already exists' });
-  }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  const newUser = {
-    id: String(users.length + 1),
-    name,
-    email,
-    passwordHash,
-  };
-
-  users.push(newUser);
-
-  console.log('Registered new user:', { id: newUser.id, name: newUser.name, email: newUser.email });
-  res.status(201).json({ message: 'User registered successfully' });
-});
-
->>>>>>> origin/feat/integrate-shadcn-ui
-app.post('/login', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+app.post('/login', async (request: Request, res: Response) => {
+  const { email, password } = request.body;
 
   if (!email || !password) {
-<<<<<<< HEAD
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
@@ -151,7 +78,6 @@ app.post('/login', async (req: Request, res: Response) => {
   res.json({ accessToken });
 });
 
-// Get current user's profile
 app.get('/me', authenticateToken, async (req: Request, res: Response) => {
   const userId = (req as any).user.userId;
   const user = await prisma.user.findUnique({
@@ -159,89 +85,8 @@ app.get('/me', authenticateToken, async (req: Request, res: Response) => {
     select: { id: true, email: true, createdAt: true },
   });
   res.json(user);
-=======
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
-
-  const user = users.find((user) => user.email === email);
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordCorrect) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const userPayload: Omit<User, 'passwordHash'> = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  };
-
-  const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '1h' });
-
-  res.json({ token, user: userPayload });
->>>>>>> origin/feat/integrate-shadcn-ui
 });
 
-
-app.listen(port, () => {
-  console.log(`Auth service listening at http://localhost:${port}`);
-=======
-app.post('/register', async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
-  const existingUser = users.find(user => user.email === email);
-  if (existingUser) {
-    return res.status(400).json({ message: 'User already exists' });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser: User = {
-    id: String(users.length + 1),
-    name,
-    email,
-    password: hashedPassword,
-  };
-
-  users.push(newUser);
-
-  // Don't send the password back, even the hash
-  res.status(201).json({ message: 'User registered successfully' });
->>>>>>> origin/fix-lint-setup
-});
-
-app.post('/login', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
-
-  const user = users.find(user => user.email === email);
-  if (!user || !user.password) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: '1h',
-  });
-
-  res.json({ token });
-});
-
-
-// Start the server only if this file is run directly
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Auth service listening at http://localhost:${port}`);

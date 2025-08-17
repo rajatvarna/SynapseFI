@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 interface Profile {
@@ -10,6 +11,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
+  const { token } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -17,13 +19,12 @@ export default function ProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
+    if (!token) {
+      router.push('/login');
+      return;
+    }
 
+    const fetchProfile = async () => {
       try {
         const res = await fetch('http://localhost:3003/profile', {
           headers: {
@@ -45,11 +46,10 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [router]);
+  }, [token, router]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
     if (!token) return;
 
     try {

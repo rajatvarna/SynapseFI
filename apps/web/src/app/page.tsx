@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import Link from 'next/link';
-=======
 import { StockTable } from "@/components/StockTable";
 import { Stock } from "shared-types";
 
@@ -26,26 +23,11 @@ async function getStocks(): Promise<Stock[]> {
 
 export default async function Home() {
   const initialStocks = await getStocks();
->>>>>>> origin/feat/integrate-shadcn-ui
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col justify-center items-center min-h-screen">
-      <h1 className="text-4xl font-bold mb-8">Welcome to the Trading App</h1>
-      <div className="flex gap-4">
-        <Link href="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
-          Login
-        </Link>
-        <Link href="/register" className="px-4 py-2 bg-gray-500 text-white rounded">
-          Register
-        </Link>
-      </div>
-    </div>
-=======
     <main className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Market Dashboard</h1>
       <StockTable initialStocks={initialStocks} />
     </main>
->>>>>>> origin/feat/integrate-shadcn-ui
   );
 }

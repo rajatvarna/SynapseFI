@@ -1,28 +1,4 @@
 version: '3.8'
-<<<<<<< HEAD
-
-services:
-  auth-service:
-    build: ./services/auth-service
-    ports:
-      - "3001:3001"
-    env_file:
-      - ./services/auth-service/.env
-
-  market-data-service:
-    build: ./services/market-data-service
-    ports:
-      - "3002:3002"
-    env_file:
-      - ./services/market-data-service/.env
-
-  user-profile-service:
-    build: ./services/user-profile-service
-    ports:
-      - "3003:3003"
-    env_file:
-      - ./services/user-profile-service/.env
-=======
 services:
   web:
     build:
@@ -39,6 +15,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    env_file:
+      - ./services/auth-service/.env
     networks:
       - app-network
 
@@ -48,6 +26,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3002:3002"
+    env_file:
+      - ./services/market-data-service/.env
     networks:
       - app-network
 
@@ -57,10 +37,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3003:3003"
+    env_file:
+      - ./services/user-profile-service/.env
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
->>>>>>> origin/feat/integrate-shadcn-ui
