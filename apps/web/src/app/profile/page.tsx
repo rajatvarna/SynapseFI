@@ -9,6 +9,8 @@ interface Profile {
   lastName: string | null;
   balance: number;
   profilePictureUrl: string | null;
+  followers: any[];
+  following: any[];
 }
 
 interface Transaction {
@@ -145,6 +147,10 @@ export default function ProfilePage() {
       {profile.profilePictureUrl && (
         <img src={profile.profilePictureUrl} alt="Profile" className="w-32 h-32 rounded-full my-4" />
       )}
+      <div className="flex gap-4 my-4">
+        <p>Followers: {profile.followers.length}</p>
+        <p>Following: {profile.following.length}</p>
+      </div>
       <p>Balance: ${profile.balance.toFixed(2)}</p>
 
       <form onSubmit={handleUpdate} className="mt-4 space-y-4">

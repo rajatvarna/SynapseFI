@@ -20,6 +20,9 @@ model Profile {
   transactions Transaction[]
   portfolio Portfolio?
   watchlist Watchlist?
+
+  followers Profile[] @relation("UserFollows")
+  following Profile[] @relation("UserFollows")
 }
 
 model Watchlist {

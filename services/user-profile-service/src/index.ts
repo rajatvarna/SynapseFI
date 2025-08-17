@@ -45,6 +45,10 @@ app.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Re
 
   let profile = await prisma.profile.findUnique({
     where: { userId: parseInt(userId) },
+    include: {
+        followers: true,
+        following: true,
+    },
   });
 
   if (!profile) {
@@ -52,10 +56,37 @@ app.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Re
       data: {
         userId: parseInt(userId),
       },
+      include: {
+        followers: true,
+        following: true,
+      },
     });
   }
 
   res.json(profile);
+});
+
+// Get user profile by ID
+app.get('/profile/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        const profile = await prisma.profile.findUnique({
+            where: { id: parseInt(id) },
+            include: {
+                followers: true,
+                following: true,
+            },
+        });
+
+        if (!profile) {
+            return res.status(404).json({ error: 'Profile not found' });
+        }
+
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching profile' });
+    }
 });
 
 // Update user profile
@@ -307,6 +338,64 @@ app.delete('/watchlist/items/:itemId', authenticateToken, async (req: Authentica
         res.status(204).send();
     } catch (error) {
         res.status(404).json({ error: 'Watchlist item not found' });
+    }
+});
+
+// Follow a user
+app.post('/profile/:id/follow', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    const followerUserId = req.user?.id;
+    const followingId = req.params.id;
+
+    if (!followerUserId) {
+        return res.status(400).json({ error: 'User ID not found in token' });
+    }
+
+    try {
+        const followerProfile = await prisma.profile.findUnique({ where: { userId: parseInt(followerUserId) } });
+        if (!followerProfile) {
+            return res.status(404).json({ error: 'Follower profile not found' });
+        }
+
+        await prisma.profile.update({
+            where: { id: followerProfile.id },
+            data: {
+                following: {
+                    connect: { id: parseInt(followingId) },
+                },
+            },
+        });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while following user' });
+    }
+});
+
+// Unfollow a user
+app.post('/profile/:id/unfollow', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    const followerUserId = req.user?.id;
+    const followingId = req.params.id;
+
+    if (!followerUserId) {
+        return res.status(400).json({ error: 'User ID not found in token' });
+    }
+
+    try {
+        const followerProfile = await prisma.profile.findUnique({ where: { userId: parseInt(followerUserId) } });
+        if (!followerProfile) {
+            return res.status(404).json({ error: 'Follower profile not found' });
+        }
+
+        await prisma.profile.update({
+            where: { id: followerProfile.id },
+            data: {
+                following: {
+                    disconnect: { id: parseInt(followingId) },
+                },
+            },
+        });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while unfollowing user' });
     }
 });
 
