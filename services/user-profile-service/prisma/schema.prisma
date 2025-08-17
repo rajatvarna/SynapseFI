@@ -16,4 +16,46 @@ model Profile {
   firstName String?
   lastName  String?
   balance   Float   @default(10000)
+  profilePictureUrl String?
+  transactions Transaction[]
+  portfolio Portfolio?
+  watchlist Watchlist?
+}
+
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  profileId Int      @unique
+  items     WatchlistItem[]
+}
+
+model WatchlistItem {
+  id          Int      @id @default(autoincrement())
+  symbol      String
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id])
+  watchlistId Int
+}
+
+model Portfolio {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  profileId Int      @unique
+  items     PortfolioItem[]
+}
+
+model PortfolioItem {
+  id          Int      @id @default(autoincrement())
+  symbol      String
+  quantity    Int
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolioId Int
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  type      String
+  amount    Float
+  date      DateTime @default(now())
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  profileId Int
 }

@@ -18,7 +18,15 @@ export function Header() {
             <div className="w-24 h-8 bg-muted animate-pulse rounded-md" />
           ) : user ? (
             <>
-              <span>Welcome, {user.name}</span>
+              <Link href="/watchlist" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Watchlist
+              </Link>
+              <Link href="/portfolio" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Portfolio
+              </Link>
+              <Link href="/profile" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Welcome, {user.name}
+              </Link>
               <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
