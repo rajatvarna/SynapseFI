@@ -37,20 +37,20 @@ app.get('/', (req: Request, res: Response) => {
 
 // Get or create user profile
 app.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.id;
 
   if (!userId) {
     return res.status(400).json({ error: 'User ID not found in token' });
   }
 
   let profile = await prisma.profile.findUnique({
-    where: { userId },
+    where: { userId: parseInt(userId) },
   });
 
   if (!profile) {
     profile = await prisma.profile.create({
       data: {
-        userId,
+        userId: parseInt(userId),
       },
     });
   }
@@ -60,7 +60,7 @@ app.get('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Re
 
 // Update user profile
 app.put('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.id;
   const { firstName, lastName } = req.body;
 
   if (!userId) {
@@ -69,7 +69,7 @@ app.put('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Re
 
   try {
     const updatedProfile = await prisma.profile.update({
-      where: { userId },
+      where: { userId: parseInt(userId) },
       data: {
         firstName,
         lastName,
@@ -83,7 +83,7 @@ app.put('/profile', authenticateToken, async (req: AuthenticatedRequest, res: Re
 
 // Update user profile picture
 app.put('/profile/picture', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.id;
   const { profilePictureUrl } = req.body;
 
   if (!userId) {
@@ -96,7 +96,7 @@ app.put('/profile/picture', authenticateToken, async (req: AuthenticatedRequest,
 
   try {
     const updatedProfile = await prisma.profile.update({
-      where: { userId },
+      where: { userId: parseInt(userId) },
       data: {
         profilePictureUrl,
       },
@@ -109,7 +109,7 @@ app.put('/profile/picture', authenticateToken, async (req: AuthenticatedRequest,
 
 // Get user transaction history
 app.get('/profile/transactions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.id;
 
   if (!userId) {
     return res.status(400).json({ error: 'User ID not found in token' });
@@ -117,7 +117,7 @@ app.get('/profile/transactions', authenticateToken, async (req: AuthenticatedReq
 
   try {
     const profile = await prisma.profile.findUnique({
-      where: { userId },
+      where: { userId: parseInt(userId) },
       include: {
         transactions: true,
       },
@@ -135,13 +135,13 @@ app.get('/profile/transactions', authenticateToken, async (req: AuthenticatedReq
 
 // Get user portfolio
 app.get('/portfolio', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(400).json({ error: 'User ID not found in token' });
     }
 
-    const profile = await prisma.profile.findUnique({ where: { userId } });
+    const profile = await prisma.profile.findUnique({ where: { userId: parseInt(userId) } });
     if (!profile) {
         return res.status(404).json({ error: 'Profile not found' });
     }
@@ -165,7 +165,7 @@ app.get('/portfolio', authenticateToken, async (req: AuthenticatedRequest, res: 
 
 // Add item to portfolio
 app.post('/portfolio/items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const { symbol, quantity } = req.body;
 
     if (!userId) {
@@ -178,7 +178,7 @@ app.post('/portfolio/items', authenticateToken, async (req: AuthenticatedRequest
 
     try {
         const profile = await prisma.profile.findUnique({
-            where: { userId },
+            where: { userId: parseInt(userId) },
             include: { portfolio: true }
         });
         if (!profile || !profile.portfolio) {
@@ -234,13 +234,13 @@ app.delete('/portfolio/items/:itemId', authenticateToken, async (req: Authentica
 
 // Get user watchlist
 app.get('/watchlist', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(400).json({ error: 'User ID not found in token' });
     }
 
-    const profile = await prisma.profile.findUnique({ where: { userId } });
+    const profile = await prisma.profile.findUnique({ where: { userId: parseInt(userId) } });
     if (!profile) {
         return res.status(404).json({ error: 'Profile not found' });
     }
@@ -264,7 +264,7 @@ app.get('/watchlist', authenticateToken, async (req: AuthenticatedRequest, res: 
 
 // Add item to watchlist
 app.post('/watchlist/items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const { symbol } = req.body;
 
     if (!userId) {
@@ -277,7 +277,7 @@ app.post('/watchlist/items', authenticateToken, async (req: AuthenticatedRequest
 
     try {
         const profile = await prisma.profile.findUnique({
-            where: { userId },
+            where: { userId: parseInt(userId) },
             include: { watchlist: true }
         });
         if (!profile || !profile.watchlist) {
@@ -313,3 +313,5 @@ app.delete('/watchlist/items/:itemId', authenticateToken, async (req: Authentica
 app.listen(port, () => {
   console.log(`User profile service listening at http://localhost:${port}`);
 });
+
+export default app;

@@ -1,27 +1,38 @@
 import request from 'supertest';
-import app from './index';
 import { PrismaClient } from '@prisma/client';
-import { comparePassword } from './utils/auth';
+import { comparePassword, hashPassword } from './utils/auth';
 
+// Mock PrismaClient
+const mockUserCreate = jest.fn();
+const mockUserFindUnique = jest.fn();
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn().mockImplementation(() => ({
+    user: {
+      create: mockUserCreate,
+      findUnique: mockUserFindUnique,
+    },
+  })),
+}));
+
+// Mock auth utils
 jest.mock('./utils/auth', () => ({
   ...jest.requireActual('./utils/auth'),
   comparePassword: jest.fn(),
+  hashPassword: jest.fn(),
 }));
 
-const prisma = new PrismaClient();
+// Import app after mocks
+import app from './index';
 
 describe('Auth Service', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('POST /register', () => {
     it('should register a new user successfully', async () => {
-      (prisma.user.create as jest.Mock).mockResolvedValueOnce({
-        id: 1,
-        email: 'test@example.com',
-        password: 'hashedpassword',
-      });
+      (hashPassword as jest.Mock).mockResolvedValue('hashedpassword');
+      mockUserCreate.mockResolvedValue({ id: 1, email: 'test@example.com' });
 
       const res = await request(app)
         .post('/register')
@@ -32,7 +43,8 @@ describe('Auth Service', () => {
     });
 
     it('should return 400 if user already exists', async () => {
-      (prisma.user.create as jest.Mock).mockRejectedValueOnce(new Error());
+      (hashPassword as jest.Mock).mockResolvedValue('hashedpassword');
+      mockUserCreate.mockRejectedValue(new Error('User already exists'));
 
       const res = await request(app)
         .post('/register')
@@ -45,12 +57,9 @@ describe('Auth Service', () => {
 
   describe('POST /login', () => {
     it('should login an existing user and return a token', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValueOnce({
-        id: 1,
-        email: 'test@example.com',
-        password: 'hashedpassword',
-      });
-      (comparePassword as jest.Mock).mockResolvedValueOnce(true);
+      const user = { id: 1, email: 'test@example.com', password: 'hashedpassword' };
+      mockUserFindUnique.mockResolvedValue(user);
+      (comparePassword as jest.Mock).mockResolvedValue(true);
 
       const res = await request(app)
         .post('/login')
@@ -61,30 +70,27 @@ describe('Auth Service', () => {
     });
 
     it('should return 400 for invalid credentials (wrong password)', async () => {
-        (prisma.user.findUnique as jest.Mock).mockResolvedValueOnce({
-            id: 1,
-            email: 'test@example.com',
-            password: 'hashedpassword',
-        });
-        (comparePassword as jest.Mock).mockResolvedValueOnce(false);
+      const user = { id: 1, email: 'test@example.com', password: 'hashedpassword' };
+      mockUserFindUnique.mockResolvedValue(user);
+      (comparePassword as jest.Mock).mockResolvedValue(false);
 
-        const res = await request(app)
-            .post('/login')
-            .send({ email: 'test@example.com', password: 'wrongpassword' });
+      const res = await request(app)
+        .post('/login')
+        .send({ email: 'test@example.com', password: 'wrongpassword' });
 
-        expect(res.statusCode).toEqual(400);
-        expect(res.body).toEqual({ error: 'Invalid credentials' });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toEqual({ error: 'Invalid credentials' });
     });
 
     it('should return 400 for non-existent user', async () => {
-        (prisma.user.findUnique as jest.Mock).mockResolvedValueOnce(null);
+      mockUserFindUnique.mockResolvedValue(null);
 
-        const res = await request(app)
-            .post('/login')
-            .send({ email: 'nouser@example.com', password: 'password123' });
+      const res = await request(app)
+        .post('/login')
+        .send({ email: 'nouser@example.com', password: 'password123' });
 
-        expect(res.statusCode).toEqual(400);
-        expect(res.body).toEqual({ error: 'Invalid credentials' });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toEqual({ error: 'Invalid credentials' });
     });
   });
 });
