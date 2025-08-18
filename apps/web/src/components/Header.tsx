@@ -18,6 +18,9 @@ export function Header() {
             <div className="w-24 h-8 bg-muted animate-pulse rounded-md" />
           ) : user ? (
             <>
+              <Link href="/feed" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Feed
+              </Link>
               <Link href="/watchlist" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
                 Watchlist
               </Link>

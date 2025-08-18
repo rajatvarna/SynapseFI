@@ -40,6 +40,12 @@ async function updateUserPortfolio(userId: number, symbol: string, quantity: num
     console.log(`Updating portfolio for user ${userId}: ${quantity} of ${symbol}...`);
 }
 
+async function getFollowing(userId: number): Promise<number[]> {
+    // In a real implementation, this would call the user-profile-service
+    console.log(`Fetching following list for user ${userId}...`);
+    return [2, 3]; // Mock list of followed user IDs
+}
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -99,6 +105,34 @@ app.post('/buy', authenticateToken, async (req: AuthenticatedRequest, res: Respo
         res.status(201).json(trade);
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while processing the trade' });
+    }
+});
+
+// Get social feed
+app.get('/feed', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID not found in token' });
+    }
+
+    try {
+        const followingIds = await getFollowing(parseInt(userId));
+
+        const feed = await prisma.trade.findMany({
+            where: {
+                userId: {
+                    in: followingIds,
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        res.json(feed);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching the feed' });
     }
 });
 
