@@ -33,11 +33,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Test
-<<<<<<< HEAD
-        run: npm test
-=======
         run: npm run test --if-present
->>>>>>> origin/feat/integrate-shadcn-ui
 
   build:
     runs-on: ubuntu-latest
@@ -51,8 +47,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
-<<<<<<< HEAD
         run: npm run build --if-present -ws
-=======
-        run: npm run build --if-present
->>>>>>> origin/feat/integrate-shadcn-ui

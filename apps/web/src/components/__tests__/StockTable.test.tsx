@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { StockTable } from '../StockTable';
-import { StockPriceContext } from '../../context/StockPriceContext';
 import { Stock } from 'shared-types';
+import { StockPriceProvider, useStockPrices } from '@/context/StockPriceContext';
+import React from 'react';
 
 const mockInitialStocks: Stock[] = [
   {
@@ -14,9 +15,19 @@ const mockInitialStocks: Stock[] = [
   },
 ];
 
+jest.mock('@/context/StockPriceContext', () => ({
+  ...jest.requireActual('@/context/StockPriceContext'),
+  useStockPrices: jest.fn(),
+}));
+
 describe('StockTable', () => {
   it('renders with initial stock data', () => {
-    render(<StockTable initialStocks={mockInitialStocks} />);
+    (useStockPrices as jest.Mock).mockReturnValue({});
+    render(
+      <StockPriceProvider>
+        <StockTable initialStocks={mockInitialStocks} />
+      </StockPriceProvider>
+    );
 
     expect(screen.getByText('AAPL')).toBeInTheDocument();
     expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
@@ -25,11 +36,12 @@ describe('StockTable', () => {
 
   it('updates price from live context data', () => {
     const livePrices = { AAPL: 180.55 };
+    (useStockPrices as jest.Mock).mockReturnValue(livePrices);
 
     render(
-      <StockPriceContext.Provider value={livePrices}>
+      <StockPriceProvider>
         <StockTable initialStocks={mockInitialStocks} />
-      </StockPriceContext.Provider>
+      </StockPriceProvider>
     );
 
     // The price should now be the one from the context

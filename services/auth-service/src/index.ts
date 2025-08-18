@@ -1,14 +1,14 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client-auth';
 import cors from 'cors';
 import {
   hashPassword,
   comparePassword,
   generateToken,
-  verifyToken,
-} from './utils/auth';
+} from 'auth-utils';
+import { authenticateToken } from 'auth-middleware';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -16,21 +16,6 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
-
-const authenticateToken = (req: Request, res: Response, next: () => void) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (token == null) return res.sendStatus(401);
-
-  try {
-    const user = verifyToken(token);
-    (req as any).user = user;
-    next();
-  } catch (err) {
-    return res.sendStatus(403);
-  }
-};
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Auth service is running!');

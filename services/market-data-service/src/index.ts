@@ -1,20 +1,12 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
-import axios from 'axios';
 import cors from 'cors';
 import http from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
+import { finnhubClient } from './finnhub';
 
 const app = express();
 const port = process.env.PORT || 3002;
-
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-const finnhubClient = axios.create({
-  baseURL: 'https://finnhub.io/api/v1',
-  params: {
-    token: FINNHUB_API_KEY,
-  },
-});
 
 interface StockData {
   symbol: string;
@@ -43,10 +35,6 @@ const fetchStockPrice = async (symbol: string): Promise<StockData | null> => {
 };
 
 const initializeStockData = async () => {
-  if (!FINNHUB_API_KEY) {
-    console.error('Finnhub API key is not configured');
-    return;
-  }
   for (const symbol of popularStocks) {
     const data = await fetchStockPrice(symbol);
     if (data) {
@@ -107,9 +95,11 @@ const priceUpdateInterval = setInterval(() => {
   });
 }, 2000);
 
-server.listen(port, async () => {
-  await initializeStockData();
-  console.log(`Market data service with WebSocket listening at http://localhost:${port}`);
-});
+if (require.main === module) {
+  server.listen(port, async () => {
+    await initializeStockData();
+    console.log(`Market data service with WebSocket listening at http://localhost:${port}`);
+  });
+}
 
-export { app, server, priceUpdateInterval };
+export { app, server, priceUpdateInterval, initializeStockData, stockData, finnhubClient };

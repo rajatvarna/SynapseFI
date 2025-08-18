@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import SignupPage from '../page';
-import { AuthContext } from '@/context/AuthContext';
+import { renderWithContext } from '../../../test-utils';
 import { useRouter } from 'next/navigation';
 
 // Mock the useRouter hook
@@ -13,11 +13,9 @@ jest.mock('next/navigation', () => ({
 describe('SignupPage', () => {
   it('should call the signup function on form submit', async () => {
     const signup = jest.fn();
-    render(
-      <AuthContext.Provider value={{ login: jest.fn(), signup, user: null, loading: false }}>
-        <SignupPage />
-      </AuthContext.Provider>
-    );
+    renderWithContext(<SignupPage />, {
+      authProviderProps: { login: jest.fn(), signup, user: null, loading: false },
+    });
 
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });

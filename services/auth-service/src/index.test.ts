@@ -1,16 +1,24 @@
 import request from 'supertest';
 import app from './index';
-import { PrismaClient } from '@prisma/client';
-import { comparePassword } from './utils/auth';
+import { PrismaClient } from '.prisma/client-auth';
+import { comparePassword } from 'auth-utils';
 
-jest.mock('./utils/auth', () => ({
-  ...jest.requireActual('./utils/auth'),
+jest.mock('@prisma/client');
+
+jest.mock('auth-utils', () => ({
+  ...jest.requireActual('auth-utils'),
   comparePassword: jest.fn(),
+  hashPassword: jest.fn().mockResolvedValue('hashedpassword'),
+  generateToken: jest.fn().mockReturnValue('test-token'),
 }));
 
-const prisma = new PrismaClient();
-
 describe('Auth Service', () => {
+  let prisma: PrismaClient;
+
+  beforeEach(() => {
+    prisma = new PrismaClient();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
