@@ -80,60 +80,65 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-if (require.main === module) {
-  server.listen(port, async () => {
+const connectToFinnhub = async () => {
+    console.log('Connecting to Finnhub...');
     if (!FINNHUB_API_KEY) {
-      console.error('Finnhub API key is not configured. Please set FINNHUB_API_KEY in .env file.');
-      // In a real app, you might want to exit the process if the API key is missing
-      // For this example, we will just log the error and continue without real-time data.
-      return;
+        console.error('Finnhub API key is not configured. Please set FINNHUB_API_KEY in .env file.');
+        return;
     }
 
-    await initializeStockData();
-
     try {
-      const finnhubWs = new FinnhubWS(FINNHUB_API_KEY);
+        const finnhubWs = new FinnhubWS(FINNHUB_API_KEY);
+        console.log('FinnhubWS instance created');
 
-      finnhubWs.on('onData', (data: any) => {
-        if (data.type === 'trade') {
-          for (const trade of data.data) {
-            const stock = stockData.find(s => s.symbol === trade.s);
-            if (stock) {
-              stock.price = trade.p;
-              stock.timestamp = trade.t;
+        finnhubWs.on('onData', (data: any) => {
+            if (data.type === 'trade') {
+                for (const trade of data.data) {
+                    const stock = stockData.find(s => s.symbol === trade.s);
+                    if (stock) {
+                        stock.price = trade.p;
+                        stock.timestamp = trade.t;
+
+                        wss.clients.forEach((client) => {
+                            if (client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({ type: 'price-update', data: {
+                                    symbol: stock.symbol,
+                                    price: stock.price,
+                                    timestamp: stock.timestamp,
+                                }}));
+                            }
+                        });
+                    }
+                }
             }
-          }
+        });
 
-          const updatedPrices = stockData.map(stock => ({
-            ticker: stock.symbol,
-            price: stock.price,
-          }));
+        finnhubWs.on('onReady', () => {
+            popularStocks.forEach(symbol => {
+                finnhubWs.addSymbol(symbol);
+            });
+            console.log('Subscribed to popular stocks for real-time updates.');
+        });
 
-          wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({ type: 'prices', data: updatedPrices }));
-            }
-          });
-        }
-      });
+        finnhubWs.on('onError', (error) => {
+            console.error('Finnhub WebSocket error:', error);
+        });
 
-      finnhubWs.on('onReady', () => {
-          popularStocks.forEach(symbol => {
-              finnhubWs.addSymbol(symbol);
-          });
-          console.log('Subscribed to popular stocks for real-time updates.');
-      });
-
-      finnhubWs.on('onError', (error) => {
-          console.error('Finnhub WebSocket error:', error);
-      });
+        finnhubWs.on('onClose', () => {
+            console.log('Finnhub WebSocket closed. Attempting to reconnect...');
+            setTimeout(connectToFinnhub, 5000);
+        });
 
     } catch (error) {
         console.error('Failed to initialize Finnhub WebSocket:', error);
+        setTimeout(connectToFinnhub, 5000);
     }
-
-    console.log(`Market data service with WebSocket listening at http://localhost:${port}`);
-  });
 }
+
+server.listen(port, async () => {
+  await initializeStockData();
+  connectToFinnhub();
+  console.log(`Market data service with WebSocket listening at http://localhost:${port}`);
+});
 
 export { app, server, initializeStockData, stockData, finnhubClient };
