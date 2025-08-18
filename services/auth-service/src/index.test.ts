@@ -122,4 +122,38 @@ describe('Auth Service', () => {
       expect(res.body).toEqual({ error: 'Invalid credentials' });
     });
   });
+
+  describe('GET /admin/users', () => {
+    it('should return 403 for non-admin user', async () => {
+      const user = { id: 1, email: 'test@example.com', password: 'hashedpassword', role: 'user' };
+      mockUserFindUnique.mockResolvedValue(user);
+      (comparePassword as jest.Mock).mockResolvedValue(true);
+
+      const loginRes = await request(app)
+        .post('/login')
+        .send({ email: 'test@example.com', password: 'password123' });
+
+      const res = await request(app)
+        .get('/admin/users')
+        .set('Authorization', `Bearer ${loginRes.body.accessToken}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it('should return 200 for admin user', async () => {
+        const user = { id: 1, email: 'test@example.com', password: 'hashedpassword', role: 'admin' };
+        mockUserFindUnique.mockResolvedValue(user);
+        (comparePassword as jest.Mock).mockResolvedValue(true);
+
+        const loginRes = await request(app)
+            .post('/login')
+            .send({ email: 'test@example.com', password: 'password123' });
+
+        const res = await request(app)
+            .get('/admin/users')
+            .set('Authorization', `Bearer ${loginRes.body.accessToken}`);
+
+        expect(res.statusCode).toEqual(200);
+    });
+  });
 });

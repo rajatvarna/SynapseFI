@@ -21,7 +21,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Auth service is running!');
 });
 
-import { validate } from './middleware';
+import { validate, checkRole } from './middleware';
 import { registerSchema, loginSchema } from './validation';
 
 app.post('/register', validate(registerSchema), async (request: Request, res: Response) => {
@@ -65,6 +65,11 @@ app.get('/me', authenticateToken, async (req: Request, res: Response) => {
     select: { id: true, email: true, createdAt: true },
   });
   res.json(user);
+});
+
+app.get('/admin/users', authenticateToken, checkRole('admin'), async (req: Request, res: Response) => {
+  const users = await prisma.user.findMany();
+  res.json(users);
 });
 
 export default app;
