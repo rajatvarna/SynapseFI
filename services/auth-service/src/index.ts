@@ -72,10 +72,4 @@ app.get('/me', authenticateToken, async (req: Request, res: Response) => {
   res.json(user);
 });
 
-if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`Auth service listening at http://localhost:${port}`);
-  });
-}
-
 export default app;

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app, server, priceUpdateInterval, initializeStockData, stockData } from '../index';
+import { app, server, initializeStockData, stockData } from '../index';
 import { finnhubClient } from '../finnhub';
 
 jest.mock('../finnhub');
@@ -26,7 +26,6 @@ describe('Market Data API', () => {
   });
 
   afterAll((done) => {
-    clearInterval(priceUpdateInterval);
     server.close(done);
   });
 

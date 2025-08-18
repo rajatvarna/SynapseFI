@@ -1,39 +1,11 @@
 import request from 'supertest';
-<<<<<<< HEAD
-import { PrismaClient } from '@prisma/client';
-import { comparePassword, hashPassword } from './utils/auth';
-
-// Mock PrismaClient
-const mockUserCreate = jest.fn();
-const mockUserFindUnique = jest.fn();
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => ({
-    user: {
-      create: mockUserCreate,
-      findUnique: mockUserFindUnique,
-    },
-  })),
-}));
-
-// Mock auth utils
-jest.mock('./utils/auth', () => ({
-  ...jest.requireActual('./utils/auth'),
-  comparePassword: jest.fn(),
-  hashPassword: jest.fn(),
-}));
-
-// Import app after mocks
 import app from './index';
-
-describe('Auth Service', () => {
-  beforeEach(() => {
-=======
-import app from './index';
-import { PrismaClient } from '.prisma/client-auth';
 import { comparePassword } from 'auth-utils';
+import { mockUserCreate, mockUserFindUnique } from './__mocks__/prisma-client';
+import http from 'http';
 
-jest.mock('@prisma/client');
-
+jest.setTimeout(30000);
+jest.mock('.prisma/client-auth');
 jest.mock('auth-utils', () => ({
   ...jest.requireActual('auth-utils'),
   comparePassword: jest.fn(),
@@ -42,20 +14,22 @@ jest.mock('auth-utils', () => ({
 }));
 
 describe('Auth Service', () => {
-  let prisma: PrismaClient;
+  let server: http.Server;
 
-  beforeEach(() => {
-    prisma = new PrismaClient();
+  beforeAll((done) => {
+    server = app.listen(4001, done);
+  });
+
+  afterAll((done) => {
+    server.close(done);
   });
 
   afterEach(() => {
->>>>>>> origin/feature/refactor-and-fix-tests
     jest.clearAllMocks();
   });
 
   describe('POST /register', () => {
     it('should register a new user successfully', async () => {
-      (hashPassword as jest.Mock).mockResolvedValue('hashedpassword');
       mockUserCreate.mockResolvedValue({ id: 1, email: 'test@example.com' });
 
       const res = await request(app)
@@ -67,8 +41,7 @@ describe('Auth Service', () => {
     });
 
     it('should return 400 if user already exists', async () => {
-      (hashPassword as jest.Mock).mockResolvedValue('hashedpassword');
-      mockUserCreate.mockRejectedValue(new Error('User already exists'));
+        mockUserCreate.mockRejectedValue(new Error('User already exists'));
 
       const res = await request(app)
         .post('/register')
@@ -107,7 +80,7 @@ describe('Auth Service', () => {
     });
 
     it('should return 400 for non-existent user', async () => {
-      mockUserFindUnique.mockResolvedValue(null);
+        mockUserFindUnique.mockResolvedValue(null);
 
       const res = await request(app)
         .post('/login')
