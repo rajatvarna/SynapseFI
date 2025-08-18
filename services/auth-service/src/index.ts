@@ -21,12 +21,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Auth service is running!');
 });
 
-app.post('/register', async (request: Request, res: Response) => {
-  const { email, password } = request.body;
+import { validate } from './middleware';
+import { registerSchema, loginSchema } from './validation';
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
+app.post('/register', validate(registerSchema), async (request: Request, res: Response) => {
+  const { email, password } = request.body;
 
   try {
     const hashedPassword = await hashPassword(password);
@@ -42,12 +41,8 @@ app.post('/register', async (request: Request, res: Response) => {
   }
 });
 
-app.post('/login', async (request: Request, res: Response) => {
+app.post('/login', validate(loginSchema), async (request: Request, res: Response) => {
   const { email, password } = request.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
