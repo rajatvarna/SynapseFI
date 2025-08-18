@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { PrismaClient } from '.prisma/client-auth';
+import { PrismaClient, Role } from '.prisma/client-auth';
 import cors from 'cors';
 import {
   hashPassword,
@@ -22,7 +22,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 import { validate, checkRole } from './middleware';
-import { registerSchema, loginSchema } from './validation';
+import { registerSchema, loginSchema, updateRoleSchema } from './validation';
 
 app.post('/register', validate(registerSchema), async (request: Request, res: Response) => {
   const { email, password } = request.body;
@@ -67,9 +67,24 @@ app.get('/me', authenticateToken, async (req: Request, res: Response) => {
   res.json(user);
 });
 
-app.get('/admin/users', authenticateToken, checkRole('admin'), async (req: Request, res: Response) => {
+app.get('/admin/users', authenticateToken, checkRole(Role.ADMIN), async (req: Request, res: Response) => {
   const users = await prisma.user.findMany();
   res.json(users);
+});
+
+app.put('/admin/users/:id/role', authenticateToken, checkRole(Role.ADMIN), validate(updateRoleSchema), async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(id, 10) },
+      data: { role },
+    });
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ error: 'User not found or invalid role' });
+  }
 });
 
 export default app;

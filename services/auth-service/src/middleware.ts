@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 
-import { PrismaClient } from '.prisma/client-auth';
+import { PrismaClient, Role } from '.prisma/client-auth';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,7 @@ export const validate = (schema: z.ZodObject<any, any>) => (req: Request, res: R
   }
 };
 
-export const checkRole = (role: string) => async (req: Request, res: Response, next: NextFunction) => {
+export const checkRole = (role: Role) => async (req: Request, res: Response, next: NextFunction) => {
   const userId = (req as any).user.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
 
