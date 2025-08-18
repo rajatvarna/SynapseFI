@@ -1,9 +1,30 @@
 import request from 'supertest';
-import { app, server, priceUpdateInterval } from '../index'; // Import the app and server
-import { mockStockData } from '../mock-data';
+import { app, server, priceUpdateInterval, initializeStockData, stockData } from '../index';
+import { finnhubClient } from '../finnhub';
+
+jest.mock('../finnhub');
+
+const mockedFinnhubClient = finnhubClient as jest.Mocked<typeof finnhubClient>;
 
 describe('Market Data API', () => {
-  // After all tests are finished, close the server and clear intervals to prevent hanging processes.
+  beforeAll(async () => {
+    (mockedFinnhubClient.get as jest.Mock).mockImplementation(async (url: string, config: any) => {
+      if (url === '/quote') {
+        const symbol = config.params.symbol;
+        return Promise.resolve({
+          data: {
+            c: 150.0,
+            symbol: symbol
+          },
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+    stockData.length = 0;
+    await initializeStockData();
+    server.listen(4002);
+  });
+
   afterAll((done) => {
     clearInterval(priceUpdateInterval);
     server.close(done);
@@ -14,8 +35,8 @@ describe('Market Data API', () => {
       const response = await request(app).get('/stocks');
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBe(mockStockData.length);
-      expect(response.body[0].ticker).toBe('AAPL');
+      expect(response.body.length).toBe(5);
+      expect(response.body[0].symbol).toBe('AAPL');
     });
   });
 
@@ -24,8 +45,7 @@ describe('Market Data API', () => {
       const ticker = 'AAPL';
       const response = await request(app).get(`/stocks/${ticker}`);
       expect(response.status).toBe(200);
-      expect(response.body.ticker).toBe(ticker);
-      expect(response.body.name).toBe('Apple Inc.');
+      expect(response.body.symbol).toBe(ticker);
     });
 
     it('should return 404 for an invalid stock ticker', async () => {
@@ -39,7 +59,7 @@ describe('Market Data API', () => {
       const ticker = 'aapl';
       const response = await request(app).get(`/stocks/${ticker}`);
       expect(response.status).toBe(200);
-      expect(response.body.ticker).toBe('AAPL');
+      expect(response.body.symbol).toBe('AAPL');
     });
   });
 });

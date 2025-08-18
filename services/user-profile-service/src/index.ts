@@ -1,15 +1,14 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client-user-profile';
 import cors from 'cors';
-import jwt from 'jsonwebtoken';
+import { authenticateToken } from 'auth-middleware';
 import { User } from 'shared-types';
 
 const app = express();
 const prisma = new PrismaClient();
 const port = process.env.PORT || 3003;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
 interface AuthenticatedRequest extends Request {
   user?: User;
@@ -17,19 +16,6 @@ interface AuthenticatedRequest extends Request {
 
 app.use(cors());
 app.use(bodyParser.json());
-
-const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (token == null) return res.sendStatus(401);
-
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) return res.sendStatus(403);
-    req.user = user as User;
-    next();
-  });
-};
 
 app.get('/', (req: Request, res: Response) => {
   res.send('User profile service is running!');

@@ -1,4 +1,5 @@
 import request from 'supertest';
+<<<<<<< HEAD
 import { PrismaClient } from '@prisma/client';
 import { comparePassword, hashPassword } from './utils/auth';
 
@@ -26,6 +27,29 @@ import app from './index';
 
 describe('Auth Service', () => {
   beforeEach(() => {
+=======
+import app from './index';
+import { PrismaClient } from '.prisma/client-auth';
+import { comparePassword } from 'auth-utils';
+
+jest.mock('@prisma/client');
+
+jest.mock('auth-utils', () => ({
+  ...jest.requireActual('auth-utils'),
+  comparePassword: jest.fn(),
+  hashPassword: jest.fn().mockResolvedValue('hashedpassword'),
+  generateToken: jest.fn().mockReturnValue('test-token'),
+}));
+
+describe('Auth Service', () => {
+  let prisma: PrismaClient;
+
+  beforeEach(() => {
+    prisma = new PrismaClient();
+  });
+
+  afterEach(() => {
+>>>>>>> origin/feature/refactor-and-fix-tests
     jest.clearAllMocks();
   });
 

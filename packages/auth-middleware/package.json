@@ -1,0 +1,13 @@
+{
+  "name": "auth-middleware",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "ISC",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "shared-types": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6"
+  }
+}

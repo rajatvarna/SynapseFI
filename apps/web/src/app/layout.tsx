@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import "ui-kit/src/styles.css";
 import { Navbar } from "ui-kit";
+import { StockPriceProvider } from "@/context/StockPriceContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { Header } from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "SynapseFI",
   description: "A modern financial dashboard.",
 };
-
-import { StockPriceProvider } from "@/context/StockPriceContext";
-import { AuthProvider } from "@/context/AuthContext";
-import { Header } from "@/components/Header";
 
 export default function RootLayout({
   children,
@@ -19,21 +20,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-<<<<<<< HEAD
-      <body className="antialiased bg-gray-50 text-gray-900">
-        <Navbar />
-        <main className="container mx-auto p-4">{children}</main>
-=======
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <AuthProvider>
           <StockPriceProvider>
             <Header />
-            <main className="flex-grow">{children}</main>
+            <Navbar />
+            <main className="flex-grow container mx-auto p-4">{children}</main>
           </StockPriceProvider>
         </AuthProvider>
->>>>>>> origin/feat/integrate-shadcn-ui
       </body>
     </html>
   );
